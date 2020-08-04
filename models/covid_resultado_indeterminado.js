@@ -4,13 +4,14 @@ const schema = mongoose.Schema({
   nombre: String,
   paterno: String,
   materno: String,
-  telefonoCelular: String,
-  correoElectronico: String,
+  telefono: String,
+  correo: String,
   subEstudioVal: String,
   fecha: String,
   sucursalVal: String,
   fechaRegistro: String,
-  estatus: Number
+  estatus: Number,
+  createdDate: String
 });
 
-module.exports = mongoose.model("excelType1", schema);
+module.exports = mongoose.model("covid_resultado_indeterminado", schema);
