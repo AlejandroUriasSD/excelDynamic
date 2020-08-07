@@ -16,6 +16,7 @@ const HOST = process.env.HOST || "localhost";
 const DB_PORT = process.env.DB_PORT || 27017;
 const DB_NAME = process.env.DB_NAME || "exceldb";
 
+app.use(cors());
 
 // Connect to MongoDB database
 mongoose
@@ -30,12 +31,12 @@ mongoose
       if (req.path.startsWith("/api/post")) {
         const token = req.headers.authorization
         if (!token) {
-          res.status(401).send({error: "Acceso Denegado"});
+          res.status(401).send({ error: "Acceso Denegado" });
         }
         else {
           const decoded = jwt.verify(token, key.key, (err, result) => {
             if (err) {
-              res.status(401).send({error: err.message});
+              res.status(401).send({ error: err.message });
             } else
               next();
           });
