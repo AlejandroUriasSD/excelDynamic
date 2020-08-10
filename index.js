@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const key = require("./utils/token");
 
 
-//var cors = require('cors');
+var cors = require('cors');
 require('dotenv').config();
 
 //settings
@@ -20,13 +20,13 @@ const DB_NAME = process.env.DB_NAME || "exceldb";
 
 // Connect to MongoDB database
 mongoose
-  .connect(`mongodb://${HOST}:${DB_PORT}/${DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@exceldb-cluster.qlytw.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     const app = express();
 
 
     //middlewares
-    //app.use(cors());
+    app.use(cors());
     app.use((req, res, next) => {
       if (req.path.startsWith("/api/post")) {
         const token = req.headers.authorization
