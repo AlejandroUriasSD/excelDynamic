@@ -16,15 +16,12 @@ const HOST = process.env.HOST || "localhost";
 const DB_PORT = process.env.DB_PORT || 27017;
 const DB_NAME = process.env.DB_NAME || "exceldb";
 
-//app.use(cors());
 
 // Connect to MongoDB database
 mongoose
-  .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@exceldb-cluster.qlytw.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(`mongodb://${DB_USER}:${DB_PASSWORD}@ipx.auplex.mx:${DB_PORT}/${DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     const app = express();
-
-
     //middlewares
     app.use(cors());
     app.use((req, res, next) => {

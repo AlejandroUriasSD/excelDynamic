@@ -4,6 +4,8 @@ const universidad_notif_curso_colaborador_5 = require("../models/universidad_not
 const covid_demora_resultados3 = require("../models/covid_demora_resultados3");
 const sk_notif_benef_campa1 = require("../models/sk_notif_benef_campa1");
 const univ_notif_curso_rh_1 = require("../models/univ_notif_curso_rh_1");
+const expe_notif_resultado_pendiente_1 = require("../models/expe_notif_resultado_pendiente_1");
+const univ_notif_curso_covid_1 = require("../models/univ_notif_curso_covid_1");
 require('dotenv').config();
 const colA = process.env.COLUMN_A
 var moment = require("moment");
@@ -58,7 +60,20 @@ const getRequest = async (telefono, hsmType, msj) => {
         "msj": msj
     }
 }
-
+const getUniv_notif_curso_covid_1Model = async (row) => {
+    try {
+        return new univ_notif_curso_covid_1({
+            usuario: row[1],
+            nombreCompleto: row[2],
+            telefono: formatPhoneNumber(row[3].toString()),
+            curso: row[4],
+            estatus: row[5],
+            createdDate: moment()
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
 const getSkNotificacionModel = async (row) => {
     try {
         return new sk_notif_benef_campa1({
@@ -75,14 +90,14 @@ const getSkNotificacionModel = async (row) => {
         console.log(error);
     }
 }
-const getUniv_notif_curso_rh_1 = async (row) =>{
+const getUniv_notif_curso_rh_1 = async (row) => {
     try {
         return new univ_notif_curso_rh_1({
-            nombreCompleto:row[1],
-            telefono:formatPhoneNumber(row[2].toString()),
-            programa:row[3],
-            usuario:row[4],
-            contraseña:row[5]
+            nombreCompleto: row[1],
+            telefono: formatPhoneNumber(row[2].toString()),
+            programa: row[3],
+            usuario: row[4],
+            contraseña: row[5]
         })
     } catch (error) {
         console.log(error);
@@ -153,6 +168,16 @@ const getUniversidadCursoColaboradorModel = async (row) => {
         createdDate: moment()
     })
 }
+const getExpe_notif_resultado_pendiente_1_M_model = async (row) => {
+    return new expe_notif_resultado_pendiente_1({
+        fechaNacimiento: row[1],
+        RSV: row[2],
+        paciente: row[3],
+        clinica: row[4],
+        telefono: formatPhoneNumber(row[5].toString()),
+        createdDate: moment()
+    })
+}
 
 const handleFile = async (file, res) => {
     try {
@@ -162,52 +187,43 @@ const handleFile = async (file, res) => {
         var arrayRequest = [];
         var req = {};
         maxofRequest = 300;
-        var message, model;
+        var message, model, result;
         for (const [i, row] of workSheet._rows.entries()) {
             if (i >= 1) {
                 if (row.values.length > 0) {
                     switch (file.model) {
                         case "covid_resultado_indeterminado":
                             model = await getCovidIndeterminadoModel(row.values);
-                            result = await insertModel(model);
-                            if (result) {
-                                message = await getMsj([model.telefono]);
-                                req = await getRequest("5216673341492", file.model, message)
-                            }
+                            message = await getMsj([model.telefono]);
                             break;
                         case "universidad_notif_curso_colaborador_5":
                             model = await getUniversidadCursoColaboradorModel(row.values);
-                            result = await insertModel(model);
-                            if (result) {
-                                message = await getMsj([model.nombreCompleto, model.nombreCurso, model.estatus2, moment(model.acceso).format("YYYY-MM-DD"), "universidad@salud-digna.org", "https://universidad.salud-digna.org/"]);
-                                req = await getRequest(model.telefono, file.model, message);
-                            }
+                            message = await getMsj([model.nombreCompleto, model.nombreCurso, model.estatus2, moment(model.acceso).format("YYYY-MM-DD"), "universidad@salud-digna.org", "https://universidad.salud-digna.org/"]);
                             break;
                         case "covid_demora_resultados3":
                             model = await getCovidDemoraResultadosModel(row.values);
-                            result = await insertModel(model);
-                            if (result) {
-                                message = await getMsj([model.tiempo]);
-                                req = await getRequest(model.telefono, file.model, message);
-                            }
+                            message = await getMsj([model.tiempo]);
                             break;
                         case "sk_notif_benef_campa1":
                             model = await getSkNotificacionModel(row.values);
-                            result = await insertModel(model);
-                            if (result) {
-                                message = await getMsj(["premia", "beneficios"]);
-                                req = await getRequest(model.telefono, file.model, message);
-                            }
+                            message = await getMsj(["premia", "beneficios"]);
                             break;
                         case "univ_notif_curso_rh_1":
                             model = await getUniv_notif_curso_rh_1(row.values);
-                            result = await insertModel(model);
-                            if (result) {
-                                message = await getMsj([model.nombreCompleto, model.programa,"https://universidad.salud-digna.org", model.usuario, model.contraseña,"fortalecimientoemocional@salud-digna.org"])
-                                req = await getRequest(model.telefono, file.model, message);
-                            }
+                            message = await getMsj([model.nombreCompleto, model.programa, "https://universidad.salud-digna.org", model.usuario, model.contraseña, "fortalecimientoemocional@salud-digna.org"])
+                            break;
+                        case "expe_notif_resultado_pendiente_1":
+                            model = await getExpe_notif_resultado_pendiente_1_M_model(row.values);
+                            message = await getMsj(['6676890627']);
+                        case "univ_notif_curso_covid_1":
+                            model = await getUniv_notif_curso_covid_1Model(row.values);
+                            message = await getMsj([model.nombreCompleto, model.curso, model.estatus])
                     }
-                    arrayRequest.push(req);
+                    result = await insertModel(model);
+                    if (result) {
+                        req = await getRequest(model.telefono, file.model, message)
+                        arrayRequest.push(req);
+                    }
                 }
             }
         };
